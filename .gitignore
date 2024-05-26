@@ -15,6 +15,7 @@ __pycache__/
 *.pt
 *.pkl
 *.zip
+*.rar
 *.mahmoodlab-ws8
 *.mahmoodlab-System-Product-Name
 *.mahmoodlab3-System-Product-Name
