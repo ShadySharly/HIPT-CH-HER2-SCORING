@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 abs_imp_path = f"{src_folder}/{imp}"
                 image_input = Image.open(abs_imp_path)
                 y_pred = model.forward(**{"x": image_input}).to(device="cpu")
-                toks = model.encode(**{"x": image_input}).to(device="cpu")
+                tokens = model.encode(**{"x": image_input}).to(device="cpu")
                 y_true = label.long()[None, ...].to(device="cpu")
                 pred.append(y_pred)
                 true.append(y_true)
