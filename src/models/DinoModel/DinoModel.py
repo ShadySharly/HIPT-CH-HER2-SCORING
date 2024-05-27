@@ -1,4 +1,5 @@
 from .Encoders import EncoderDino
+from .Encoders.utils.dino_utils import eval_transforms
 import torch
 import torch.nn as nn
 
