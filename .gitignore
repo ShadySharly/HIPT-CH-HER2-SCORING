@@ -22,7 +22,7 @@ __pycache__/
 *.mahmoodlab3-System-Product-Name
 *.lambda-quad
 *.richard3
-
+*.pickle
 # C extensions
 *.so
 
