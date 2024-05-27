@@ -83,7 +83,6 @@ if __name__ == "__main__":
         with torch.no_grad():
             pred = []
             true = []
-            toks = []
             model.eval()
             for j, (imp, label) in enumerate(zip(im_vl, lb_vl)):
                 abs_imp_path = f"{src_folder}/{imp}"
@@ -93,11 +92,11 @@ if __name__ == "__main__":
                 y_true = label.long()[None, ...].to(device="cpu")
                 pred.append(y_pred)
                 true.append(y_true)
-                toks.append(tokens)
+                tokens.append(tokens)
                 
             pred = torch.cat(pred, axis =0).numpy()
             true = torch.cat(true, axis =0).numpy().astype(int)
-            tokens = torch.cat(toks, axis =0).numpy()
+            tokens = torch.cat(tokens, axis =0).numpy()
             pred_ = np.argmax(pred, axis=1).astype(int)
             true_ = true
             where_wrong = (pred_==true_)
@@ -106,8 +105,7 @@ if __name__ == "__main__":
             logging.info(np.sum(pred_==true_))
             acc = np.sum(pred_==true_) /len(true_)
             logging.info(f"Accuracy {acc} epoch {epoch}")
-            handler_pickle(tokens, './outputs', 'tokens_dino_epoch_{}'.format(epoch))
-            handler_pickle(true, './outputs', 'trues_dino_epoch_{}'.format(epoch))
+            handler_pickle(tokens, './outputs', 'tokens_dino')
 
 
         
