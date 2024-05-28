@@ -4,6 +4,8 @@ from PIL import Image
 import torch
 from torchvision import transforms
 import torchvision
+
+
 class DinoDataset(Dataset):
     def __init__(
         self,
