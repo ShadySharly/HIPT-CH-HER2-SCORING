@@ -3,6 +3,7 @@ from .utils import get_vit256, get_vit4k
 from einops import rearrange, repeat
 from torchvision import transforms
 
+
 class EncoderDino(torch.nn.Module):
     def __init__(
         self,

@@ -2,7 +2,8 @@ from .Encoders import EncoderDino
 from .Encoders.utils.dino_utils import eval_transforms
 import torch
 import torch.nn as nn
-
+from torchvision import transforms
+import torchvision
 
 class TokenClassifier(nn.Module):
     def __init__(self, embedding_size, num_classes, **kwargs):
@@ -21,6 +22,7 @@ class DinoModel(nn.Module):
 
         # general params
         self.kwargs = kwargs
+        self.transform = transforms.Compose([ torchvision.transforms.ToPILImage()])
         self.checkpoint_dino_one = self.kwargs["checkpoint_dino_one"]
         self.checkpoint_dino_two = self.kwargs["checkpoint_dino_two"]
         self.device_one = self.kwargs["device_one"]
@@ -49,6 +51,7 @@ class DinoModel(nn.Module):
             p.requires_grad = True
 
     def encode(self, x, **kwargs):
+        x = self.transform(x.squeeze(0))
         x = eval_transforms()(x).unsqueeze(dim=0)
         x = self.encoder_dino(x)
         return x
