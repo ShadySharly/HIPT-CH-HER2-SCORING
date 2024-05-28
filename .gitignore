@@ -2,7 +2,27 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+*__pycache__*
+*.DS_store
+*.pyc
+*.jpg
+*.vscode
+*.csv
+*.svs
+*.parcel
+*.txt
+*.pth
+*.pt
+*.pkl
+*.zip
+*.rar
+*.parquet
+*.mahmoodlab-ws8
+*.mahmoodlab-System-Product-Name
+*.mahmoodlab3-System-Product-Name
+*.lambda-quad
+*.richard3
+*.pickle
 # C extensions
 *.so
 
