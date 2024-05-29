@@ -10,7 +10,10 @@ import datetime
 import numpy as np
 import torch.nn.functional as F
 from PIL import Image
-
+from torch.utils.data import DataLoader
+from dataset import DinoDataset
+from torchvision import transforms
+import torchvision
 LOG_FILENAME = f"./logs/main_dino_{datetime.datetime.now()}.log"
 logger = logging.getLogger()
 logging.root.handlers = []
@@ -46,40 +49,57 @@ if __name__ == "__main__":
     logging.info("Loading dataset ...")
     logging.info("\n\n")
 
-    partitions = pd.read_parquet(
-        "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/partitions_dinosharly.parquet"
-    )
-    tr_examples = partitions.loc[partitions.partition == "training_0"][
-        ["ImageId", "new_codigo"]
-    ].values
-    vl_examples = partitions.loc[partitions.partition == "validation_0"][
-        ["ImageId", "new_codigo"]
-    ].values
-    ts_examples = partitions.loc[partitions.partition == "test"][
-        ["ImageId", "new_codigo"]
-    ].values
-
     # edit this
     src_folder = "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/image"
-    # define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
-    im_tr, lb_tr = tr_examples[:, 0], torch.from_numpy(tr_examples[:, 1].astype(int))
-    im_vl, lb_vl = vl_examples[:, 0], torch.from_numpy(vl_examples[:, 1].astype(int))
-    im_ts, lb_ts = ts_examples[:, 0], torch.from_numpy(ts_examples[:, 1].astype(int))
+    data_loader_train = DataLoader(
+        DinoDataset(
+            **{
+                "partitions_src": "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/partitions_dinosharly.parquet",
+                "split": "0",
+                "set_type": "training",
+                "images_folder": "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/image",
+          
+            }
+        ), batch_size= 1, shuffle=True
+    )
+
+    data_loader_validation = DataLoader(
+        DinoDataset(
+            **{
+                "partitions_src": "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/partitions_dinosharly.parquet",
+                "split": "0",
+                "set_type": "validation",
+                "images_folder": "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/image",
+             
+            }
+        )
+    )
+
+    data_loader_test = DataLoader(
+        DinoDataset(
+            **{
+                "partitions_src": "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/partitions_dinosharly.parquet",
+                "split": "0",
+                "set_type": "test",
+                "images_folder": "/home/bgamboa/side_projects/HIPT-CH-HER2-SCORING/src/data/image",
+            
+            }
+        )
+    )
+
 
     for epoch in range(n_epochs):
         model.train()
         logging.info(f"Starting Epoch {epoch}")
-        for i, (imp, label) in enumerate(zip(im_tr, lb_tr)):
-            abs_imp_path = f"{src_folder}/{imp}"
-            image_input = Image.open(abs_imp_path)
-            y_pred = model.forward(**{"x": image_input})
-            y_true = label.long()[None, ...].to(device="cuda:0")
+        for i, (batch_data, label) in enumerate(data_loader_train):
+            y_pred = model.forward(**{"x": batch_data["data"]})
+            y_true = label.long().to(device="cuda:0")
             loss = F.cross_entropy(y_pred, y_true)
             loss = loss / n_cum_grads
             loss.backward()
-            if ((i + 1) % n_cum_grads) == 0 or (i + 1 == len(im_tr)):
+            if ((i + 1) % n_cum_grads) == 0 or (i + 1 == len(data_loader_train)):
                 logging.info(f"Optimizer step ... {i}")
                 optimizer.step()
                 optimizer.zero_grad()
@@ -89,16 +109,13 @@ if __name__ == "__main__":
             true = []
             toks = []
             model.eval()
-            for j, (imp, label) in enumerate(zip(im_vl, lb_vl)):
-                abs_imp_path = f"{src_folder}/{imp}"
-                image_input = Image.open(abs_imp_path)
-                y_pred = model.forward(**{"x": image_input}).to(device="cpu")
-                tokens = model.encode(**{"x": image_input}).to(device="cpu")
-                y_true = label.long()[None, ...].to(device="cpu")
+            for j, (batch_data, label) in enumerate(data_loader_validation):
+                y_pred = model.forward(**{"x":  batch_data["data"]}).to(device="cpu")
+                tokens = model.encode(**{"x":  batch_data["data"]}).to(device="cpu")
+                y_true = label.long().to(device="cpu")
                 pred.append(y_pred)
                 true.append(y_true)
                 toks.append(tokens)
-
             pred = torch.cat(pred, axis=0).numpy()
             true = torch.cat(true, axis=0).numpy().astype(int)
             tokens = torch.cat(toks, axis=0).numpy()

@@ -12,6 +12,7 @@ def checkpoint_handler(checkpoint_path):
         od[key.replace("model.", "")] = checkpoint["state_dict"][key]
     return od
 
+
 def handler_pickle(file, path, name):
     if not os.path.exists(path):
         os.makedirs(path)

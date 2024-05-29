@@ -84,7 +84,9 @@ TILE_LABEL_TEXT_SIZE = 10
 LABEL_ALL_TILES_IN_TOP_TILE_SUMMARY = True
 BORDER_ALL_TILES_IN_TOP_TILE_SUMMARY = True
 
-TILE_BORDER_SIZE = 10  # The size of the colored rectangular border around summary tiles.
+TILE_BORDER_SIZE = (
+    10  # The size of the colored rectangular border around summary tiles.
+)
 
 HIGH_COLOR = (0, 255, 0)
 MEDIUM_COLOR = (255, 255, 0)
